@@ -1,0 +1,39 @@
+# Render Blueprint: Preschool app (backend + frontend + Postgres)
+# https://render.com/docs/blueprint-spec
+
+databases:
+  - name: playschool-db
+    databaseName: playschool
+    plan: free
+
+services:
+  # Backend: FastAPI on Python
+  - type: web
+    name: preschool-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: playschool-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+        # In Dashboard, set to JSON array of your frontend URL, e.g. ["https://preschool-app.onrender.com"]
+
+  # Frontend: Vite static site
+  - type: web
+    name: preschool-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false
+        # In Dashboard, set to your backend API base, e.g. https://preschool-backend.onrender.com/api/v1
