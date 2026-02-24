@@ -6,7 +6,6 @@ Production-ready FastAPI backend with PostgreSQL, JWT authentication, role-based
 
 - **JWT authentication**: Access + refresh tokens, configurable expiry
 - **Roles**: Admin, Teacher, Parent with role middleware and dependency checks
-- **QR attendance**: Teachers generate time-limited QR tokens; parents mark attendance only for their own child; single-use tokens with replay protection
 - **CRUD**: Users (admin), Students, Activities, Attendance, Feedback with validation
 - **Analytics**: Dashboard and attendance analytics for teachers/admin
 - **Security**: Bcrypt password hashing, token validation, CORS
