@@ -1,1 +1,0 @@
-# popinz_school
