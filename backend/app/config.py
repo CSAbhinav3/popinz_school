@@ -29,10 +29,6 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 60
     refresh_token_expire_days: int = 7
 
-    # QR attendance
-    qr_token_expire_minutes: int = 15
-    qr_secret_key: str = "qr-secret-change-in-production"
-
     # CORS — allow common Vite dev ports so login works from any port
     cors_origins: list[str] = [
         "http://localhost:5173",

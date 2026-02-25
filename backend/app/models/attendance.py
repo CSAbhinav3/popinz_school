@@ -11,7 +11,6 @@ from app.database import Base
 if TYPE_CHECKING:
     from app.models.user import User
     from app.models.student import Student
-    from app.models.qr_token import QRToken
 
 
 class AttendanceStatus(str, enum.Enum):
@@ -43,10 +42,6 @@ class Attendance(Base):
         ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True,
     )
-    qr_token_id: Mapped[int | None] = mapped_column(
-        ForeignKey("qr_tokens.id", ondelete="SET NULL"),
-        nullable=True,
-    )
     marked_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -56,10 +51,6 @@ class Attendance(Base):
     marked_by: Mapped["User | None"] = relationship(
         "User",
         back_populates="attendance_marked",
-    )
-    qr_token: Mapped["QRToken | None"] = relationship(
-        "QRToken",
-        back_populates="attendance",
     )
 
     def __repr__(self) -> str:

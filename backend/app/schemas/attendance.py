@@ -2,7 +2,7 @@
 from datetime import date, datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from app.models.attendance import AttendanceStatus
 
@@ -19,14 +19,6 @@ class AttendanceCreate(AttendanceBase):
     """Schema for creating attendance (teacher/admin manual)."""
 
     pass
-
-
-class AttendanceMarkRequest(BaseModel):
-    """Request to mark attendance via QR (parent)."""
-
-    qr_token: str = Field(..., min_length=1)
-    student_id: int = Field(..., gt=0)
-    status: AttendanceStatus = AttendanceStatus.PRESENT
 
 
 class AttendanceResponse(AttendanceBase):

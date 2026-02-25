@@ -26,7 +26,7 @@ def create_application() -> FastAPI:
     settings = get_settings()
     app = FastAPI(
         title=settings.app_name,
-        description="Play School Management System - JWT auth, roles, QR attendance, analytics",
+        description="Play School Management System - JWT auth, roles, attendance, analytics",
         version="1.0.0",
         lifespan=lifespan,
         docs_url="/docs",

@@ -1,5 +1,5 @@
-"""Attendance: QR generation (teacher/admin), mark via QR (parent, own child only), list, analytics."""
-from datetime import date, datetime, timezone
+"""Attendance: list, manual create (teacher/admin), analytics."""
+from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -10,90 +10,11 @@ from app.database import get_db
 from app.models.user import User, UserRole
 from app.models.student import Student
 from app.models.attendance import Attendance, AttendanceStatus
-from app.models.qr_token import QRToken
-from app.schemas.attendance import (
-    AttendanceCreate,
-    AttendanceMarkRequest,
-    AttendanceResponse,
-)
-from app.schemas.qr import QRGenerateResponse
+from app.schemas.attendance import AttendanceCreate, AttendanceResponse
 from app.core.dependencies import get_current_user, RequireAdminOrTeacher
-from app.utils.qr_token import generate_qr_token, validate_and_consume_qr_token
-from app.config import get_settings
-from sqlalchemy import ForeignKey
 
 
 router = APIRouter(prefix="/attendance", tags=["attendance"])
-settings = get_settings()
-
-
-@router.post("/qr/generate", response_model=QRGenerateResponse)
-async def generate_qr(
-    db: Annotated[AsyncSession, Depends(get_db)],
-    current_user: RequireAdminOrTeacher,
-) -> dict:
-    """Generate a new QR token for attendance marking. Token expires in configured minutes (replay-safe)."""
-    raw_token, qr = await generate_qr_token(db, student_id)
-    return {
-        "qr_token": raw_token,
-        "session_id": qr.session_id,
-        "expires_at": qr.expires_at,
-        "expires_in_seconds": settings.qr_token_expire_minutes * 60,
-    }
-
-
-@router.post("/mark", response_model=AttendanceResponse, status_code=status.HTTP_201_CREATED)
-async def mark_attendance(
-    body: AttendanceMarkRequest,
-    db: Annotated[AsyncSession, Depends(get_db)],
-    current_user: Annotated[User, Depends(get_current_user)],
-) -> Attendance:
-    """Mark attendance using QR token. Parents can only mark for their own child. Token is single-use."""
-    if current_user.role != UserRole.PARENT:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only parents can mark attendance via QR",
-        )
-    qr = await validate_and_consume_qr_token(db, body.qr_token)
-    if not qr:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid, expired, or already used QR token",
-        )
-    result = await db.execute(select(Student).where(Student.id == body.student_id))
-    student = result.scalar_one_or_none()
-    if not student:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
-    if student.parent_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You can only mark attendance for your own child",
-        )
-    # One attendance per student per date
-    existing = await db.execute(
-        select(Attendance).where(
-            and_(
-                Attendance.student_id == body.student_id,
-                Attendance.attendance_date == date.today(),
-            )
-        )
-    )
-    if existing.scalar_one_or_none():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Attendance already marked for this student today",
-        )
-    attendance = Attendance(
-        student_id=body.student_id,
-        attendance_date=date.today(),
-        status=body.status,
-        marked_by_id=current_user.id,
-        qr_token_id=qr.id,
-    )
-    db.add(attendance)
-    await db.flush()
-    await db.refresh(attendance)
-    return attendance
 
 
 @router.get("", response_model=list[AttendanceResponse])
