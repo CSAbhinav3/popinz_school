@@ -1,10 +1,10 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import Home from './pages/Home';
-import About from './pages/About';
 import Login from './pages/Login';
+import Admin from './pages/Admin';
 import Dashboard from './pages/Dashboard';
 import Students from './pages/Students';
 import Activity from './pages/Activity';
@@ -17,9 +17,9 @@ function App() {
     <div className="app-container">
       <Layout>
         <Routes>
-          {/* Public Routes */}
+          {/* Public Routes — Home is combined landing (hero + about + team + contact) */}
           <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/about" element={<Navigate to="/#about" replace />} />
           <Route path="/login" element={<Login />} />
 
           {/* Public - Activity & Feedback (open for everyone) */}
@@ -27,11 +27,21 @@ function App() {
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/announcements" element={<Announcements />} />
 
-          {/* Admin + Teacher Routes */}
+          {/* Admin only: create teacher accounts */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Teacher routes */}
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute allowedRoles={['admin', 'teacher']}>
+              <ProtectedRoute allowedRoles={['teacher']}>
                 <Dashboard />
               </ProtectedRoute>
             }
@@ -40,7 +50,7 @@ function App() {
           <Route
             path="/students"
             element={
-              <ProtectedRoute allowedRoles={['admin', 'teacher']}>
+              <ProtectedRoute allowedRoles={['teacher']}>
                 <Students />
               </ProtectedRoute>
             }
@@ -50,7 +60,7 @@ function App() {
           <Route
             path="/attendance"
             element={
-              <ProtectedRoute allowedRoles={['parent', 'teacher', 'admin']}>
+              <ProtectedRoute allowedRoles={['parent', 'teacher']}>
                 <Attendance />
               </ProtectedRoute>
             }

@@ -2,7 +2,6 @@
 from functools import lru_cache
 from typing import Optional
 
-from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -22,7 +21,6 @@ class Settings(BaseSettings):
 
     # Database: default SQLite (no MySQL needed). For MySQL set in .env:
     # DATABASE_URL=mysql+aiomysql://root:password@localhost:3306/playschool
-    # For Render Postgres, use the URL Render provides (postgres://) — it is converted to postgresql+asyncpg://
     database_url: str = "sqlite+aiosqlite:///./playschool.db"
 
     # JWT
@@ -50,16 +48,6 @@ class Settings(BaseSettings):
         "http://localhost:3000",
         "http://127.0.0.1:3000",
     ]
-
-    @field_validator("database_url", mode="before")
-    @classmethod
-    def normalize_postgres_url(cls, v: str) -> str:
-        """Render and others give postgres://; SQLAlchemy async needs postgresql+asyncpg://."""
-        if v and v.startswith("postgres://"):
-            return v.replace("postgres://", "postgresql+asyncpg://", 1)
-        if v and v.startswith("postgresql://"):
-            return v.replace("postgresql://", "postgresql+asyncpg://", 1)
-        return v
 
 
 @lru_cache

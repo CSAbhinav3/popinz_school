@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Rocket, User, LogIn, LogOut } from 'lucide-react';
+import { Menu, X, LogIn, LogOut, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 
@@ -9,69 +9,60 @@ const Navbar = () => {
     const location = useLocation();
     const { user, logout } = useAuth();
 
-    const links = [
-        { name: 'Home', path: '/' },
-        { name: 'About Us', path: '/about' },
-        { name: 'Activity', path: '/activity' },
-        ...(user?.role !== 'parent' ? [{ name: 'Student details', path: '/students' }] : []),
-        { name: 'Announcements', path: '/announcements' },
-    ];
-
-    if (user?.role === 'teacher' || user?.role === 'admin') {
-        links.push({ name: 'Dashboard', path: '/dashboard' });
-    }
-
-    if (user?.role === 'parent' || user?.role === 'teacher' || user?.role === 'admin') {
-        links.push({ name: 'Attendance', path: '/attendance' });
-    }
+    const links = user?.role === 'admin'
+        ? []
+        : [
+            ...(user?.role === 'teacher' ? [{ name: 'Dashboard', path: '/dashboard' }] : []),
+            ...(user ? [{ name: 'Activity', path: '/activity' }] : []),
+            ...(user && user?.role === 'teacher' ? [{ name: 'Student details', path: '/students' }] : []),
+            ...(user ? [{ name: 'Announcements', path: '/announcements' }] : []),
+            ...(user?.role === 'parent' || user?.role === 'teacher' ? [{ name: 'Attendance', path: '/attendance' }] : []),
+            ...(user?.role === 'parent' ? [{ name: 'Feedback', path: '/feedback' }] : []),
+          ];
 
     const toggleMenu = () => setIsOpen(!isOpen);
 
     return (
         <nav className="navbar-main" style={{
-            background: 'var(--card-bg)',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-            borderBottom: '1px solid rgba(0,0,0,0.06)',
+            background: 'var(--card-bg, #ffffff)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
             position: 'sticky',
             top: 0,
             zIndex: 1000,
-            padding: '0.75rem 0'
+            padding: '1.25rem 0',
+            minHeight: '72px',
+            borderBottom: '1px solid rgba(0,0,0,0.06)'
         }}>
-            <div className="container" style={{ padding: '0 0.5rem' }}>
-                {/* Site name on top */}
-                <div style={{ textAlign: 'center', marginBottom: '0.75rem', paddingBottom: '0.5rem', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                    <Link to="/" style={{ display: 'inline-block', fontSize: '1.35rem', fontWeight: 800, color: 'var(--primary)', textDecoration: 'none', letterSpacing: '-0.02em' }}>
-                        Poppinz Preschool and Daycare
+            <div className="container navbar-container" style={{ padding: '0 1.5rem', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+                {/* Row 1: Logo + name (left) | Hi + Logout (right) */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    <Link
+                        to="/"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            textDecoration: 'none',
+                            color: 'var(--primary)'
+                        }}
+                    >
+                        <span style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 40,
+                            height: 40,
+                            borderRadius: '10px',
+                            background: 'var(--primary)',
+                            color: 'white',
+                            flexShrink: 0
+                        }}>
+                            <Sparkles size={22} strokeWidth={2.5} />
+                        </span>
+                        <span style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
+                            Poppinz Preschool & Daycare
+                        </span>
                     </Link>
-                </div>
-
-                {/* Nav row: links at start, auth at end — full width */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', width: '100%' }}>
-                    <div className="desktop-menu navbar-links" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                        {links.map((link) => {
-                            const isActive = location.pathname === link.path;
-                            return (
-                                <Link
-                                    key={link.path}
-                                    to={link.path}
-                                    className="navbar-link-item"
-                                    style={{
-                                        fontWeight: 600,
-                                        fontSize: '0.9rem',
-                                        color: isActive ? 'var(--primary)' : 'var(--text)',
-                                        position: 'relative',
-                                        padding: '0.5rem 1rem',
-                                        textDecoration: 'none',
-                                        border: isActive ? '1px solid var(--primary)' : '1px solid #e0e0e0',
-                                        borderRadius: '10px',
-                                        background: isActive ? '#f5f0f0' : 'transparent'
-                                    }}
-                                >
-                                    {link.name}
-                                </Link>
-                            );
-                        })}
-                    </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         <div className="desktop-menu" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -79,31 +70,76 @@ const Navbar = () => {
                                 <>
                                     <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--primary)' }}>Hi, {user?.full_name ?? user?.name}</span>
                                     <button onClick={logout} style={{
-                                        display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 0.85rem', fontSize: '0.85rem',
+                                        display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.9rem', fontSize: '0.85rem',
                                         background: '#f0f0f0', color: 'var(--text)', border: '1px solid #e0e0e0', borderRadius: '8px', fontWeight: 600, cursor: 'pointer'
                                     }}>
                                         <LogOut size={16} /> Logout
                                     </button>
                                 </>
                             ) : (
-                                <Link to="/login">
-                                    <button style={{
-                                        display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 0.85rem', fontSize: '0.85rem',
-                                        background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer'
-                                    }}>
-                                        <LogIn size={16} /> Login
-                                    </button>
-                                </Link>
-                            )}
+                                    <Link to="/login">
+                                        <button style={{
+                                            display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.9rem', fontSize: '0.85rem',
+                                            background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer'
+                                        }}>
+                                            <LogIn size={16} /> Login
+                                        </button>
+                                    </Link>
+                                )}
                         </div>
-                        <div className="mobile-toggle" onClick={toggleMenu} style={{ cursor: 'pointer', color: 'var(--text)', padding: '0.25rem' }}>
+                        {links.length > 0 && (
+                        <div className="mobile-toggle" onClick={toggleMenu} style={{ cursor: 'pointer', color: 'var(--text)', padding: '0.35rem' }}>
                             {isOpen ? <X size={26} /> : <Menu size={26} />}
                         </div>
+                        )}
                     </div>
                 </div>
+
+                {/* Row 2: Nav links below — only when logged in */}
+                {links.length > 0 && (
+                <div
+                    className="desktop-menu navbar-links"
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'stretch',
+                        flexWrap: 'wrap',
+                        width: '100%',
+                        marginTop: '0.75rem',
+                        paddingTop: '0.75rem',
+                        borderTop: '1px solid rgba(0,0,0,0.06)',
+                        gap: '0.5rem',
+                    }}
+                >
+                    {links.map((link) => {
+                        const isActive = location.pathname === link.path;
+                        return (
+                            <Link
+                                key={link.path}
+                                to={link.path}
+                                className={`navbar-link-item ${isActive ? 'navbar-link-active' : ''}`}
+                                style={{
+                                    fontWeight: 600,
+                                    fontSize: '0.9rem',
+                                    color: isActive ? 'var(--primary)' : 'var(--text)',
+                                    padding: '0.6rem 1.25rem',
+                                    textDecoration: 'none',
+                                    borderRadius: '10px',
+                                    background: isActive ? 'rgba(255,107,107,0.12)' : 'transparent',
+                                    border: isActive ? '1px solid rgba(255,107,107,0.25)' : '1px solid transparent',
+                                    transition: 'color 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s',
+                                }}
+                            >
+                                {link.name}
+                            </Link>
+                        );
+                    })}
+                </div>
+                )}
             </div>
 
-            {/* Mobile Menu */}
+            {/* Mobile Menu — only when there are links */}
+            {links.length > 0 && (
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -136,6 +172,7 @@ const Navbar = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+            )}
 
             {/* Styles for responsive hiding are needed in CSS usually, but I'll add inline style handling or rely on media queries in index.css */}
             <style>{`
@@ -146,8 +183,14 @@ const Navbar = () => {
           .mobile-toggle { display: none !important; }
         }
         .navbar-main .navbar-link-item:hover {
-          background: #f0f0f0 !important;
-          border-color: #d0d0d0 !important;
+          background: rgba(255,107,107,0.08) !important;
+          color: var(--primary) !important;
+          border-color: rgba(255,107,107,0.15) !important;
+        }
+        .navbar-main .navbar-link-item.navbar-link-active:hover {
+          background: rgba(255,107,107,0.18) !important;
+          border-color: rgba(255,107,107,0.35) !important;
+          box-shadow: 0 2px 8px rgba(255,107,107,0.15);
         }
         .navbar-main button:hover { opacity: 0.9; transform: translateY(-1px); }
         .navbar-main button:active { transform: translateY(0); }

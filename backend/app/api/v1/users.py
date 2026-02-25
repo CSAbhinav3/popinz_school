@@ -1,4 +1,4 @@
-"""User CRUD (Admin only) + Teacher create parent."""
+"""User CRUD (Admin only) + Admin create parent."""
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -9,7 +9,7 @@ from app.database import get_db
 from app.models.user import User, UserRole
 from app.schemas.user import UserCreate, UserUpdate, UserResponse, CreateParentBody
 from app.core.security import get_password_hash
-from app.core.dependencies import RequireAdmin, RequireAdminOrTeacher
+from app.core.dependencies import RequireAdmin
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -18,9 +18,9 @@ router = APIRouter(prefix="/users", tags=["users"])
 async def create_parent(
     body: CreateParentBody,
     db: Annotated[AsyncSession, Depends(get_db)],
-    current_user: RequireAdminOrTeacher,
+    current_user: RequireAdmin,
 ) -> User:
-    """Create a parent account. Teacher or admin only (uses JWT)."""
+    """Create a parent account. Admin only (uses JWT)."""
     result = await db.execute(select(User).where(User.email == body.email))
     if result.scalar_one_or_none():
         raise HTTPException(

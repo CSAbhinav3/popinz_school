@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Upload, Edit2, Calendar, Heart, X, Trash2, Filter } from 'lucide-react';
+import { Upload, Edit2, Calendar, X, Trash2, Filter } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ACTIVITY_CATEGORIES = ['Art', 'Music', 'Outdoor', 'Story Time', 'Science', 'Play', 'Other'];
@@ -10,10 +10,6 @@ const Activity = () => {
     const [activities, setActivities] = useState(() => {
         const saved = localStorage.getItem('activities');
         return saved ? JSON.parse(saved) : [];
-    });
-    const [likes, setLikes] = useState(() => {
-        const saved = localStorage.getItem('activity_likes');
-        return saved ? JSON.parse(saved) : {};
     });
     const [lightboxActivity, setLightboxActivity] = useState(null);
 
@@ -27,9 +23,6 @@ const Activity = () => {
             }
         }
     }, [activities]);
-    React.useEffect(() => {
-        localStorage.setItem('activity_likes', JSON.stringify(likes));
-    }, [likes]);
 
     const [isEditing, setIsEditing] = useState(null);
     const [showUpload, setShowUpload] = useState(false);
@@ -74,18 +67,9 @@ const Activity = () => {
         setFormData({ title: '', description: '', image: '', date: new Date().toISOString().split('T')[0], category: 'Play' });
     };
 
-    const toggleLike = (activityId) => {
-        setLikes(prev => ({ ...prev, [activityId]: !prev[activityId] }));
-    };
-
     const handleDelete = (activity) => {
         if (!window.confirm(`Delete "${activity.title}"? This cannot be undone.`)) return;
         setActivities(activities.filter(a => a.id !== activity.id));
-        setLikes(prev => {
-            const next = { ...prev };
-            delete next[activity.id];
-            return next;
-        });
         if (isEditing === activity.id) {
             setIsEditing(null);
             setShowUpload(false);
@@ -119,38 +103,44 @@ const Activity = () => {
                 <div style={{
                     flex: '1 1 0',
                     minWidth: 0,
-                    background: 'white',
-                    padding: '0.5rem 1rem',
+                    background: 'linear-gradient(135deg, rgba(255,107,107,0.08) 0%, rgba(255,230,109,0.06) 50%, rgba(78,205,196,0.06) 100%)',
+                    padding: '0.75rem 1.25rem',
                     borderRadius: '16px',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
-                    border: '1px solid rgba(0,0,0,0.04)',
+                    boxShadow: '0 2px 12px rgba(255,107,107,0.08)',
+                    border: '1px solid rgba(255,107,107,0.15)',
                     overflow: 'hidden',
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', flexWrap: 'wrap', width: '100%' }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', color: '#555', fontWeight: 600, flexShrink: 0 }}>
-                            <Filter size={16} color="var(--primary)" /> Category
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap', width: '100%' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.9rem', color: 'var(--primary)', fontWeight: 700, flexShrink: 0 }}>
+                            <Filter size={18} color="var(--primary)" /> Category
                         </span>
-                        {['', ...ACTIVITY_CATEGORIES].map(cat => (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                        {['', ...ACTIVITY_CATEGORIES].map(cat => {
+                            const isSelected = (filterCategory || '') === (cat || '');
+                            return (
                             <button
                                 key={cat || 'all'}
                                 type="button"
                                 onClick={() => setFilterCategory(cat)}
                                 style={{
-                                    padding: '0.35rem 0.75rem',
-                                    borderRadius: '10px',
-                                    border: 'none',
-                                    background: (filterCategory || '') === (cat || '') ? 'var(--primary)' : '#f0f4f8',
-                                    color: (filterCategory || '') === (cat || '') ? 'white' : '#555',
-                                    fontSize: '0.8rem',
+                                    padding: '0.45rem 0.9rem',
+                                    borderRadius: '12px',
+                                    border: isSelected ? 'none' : '1px solid rgba(255,107,107,0.2)',
+                                    background: isSelected ? 'var(--primary)' : 'rgba(255,255,255,0.7)',
+                                    color: isSelected ? 'white' : 'var(--text)',
+                                    fontSize: '0.85rem',
                                     fontWeight: 600,
                                     cursor: 'pointer',
-                                    transition: 'background 0.2s, color 0.2s',
+                                    transition: 'background 0.2s, color 0.2s, transform 0.15s',
                                     flexShrink: 0,
+                                    boxShadow: isSelected ? '0 2px 8px rgba(255,107,107,0.3)' : 'none',
                                 }}
                             >
                                 {cat || 'All'}
                             </button>
-                        ))}
+                            );
+                        })}
+                        </div>
                     </div>
                 </div>
 
@@ -159,11 +149,11 @@ const Activity = () => {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.6rem',
-                    background: 'white',
+                    background: 'linear-gradient(135deg, rgba(78,205,196,0.08) 0%, rgba(255,230,109,0.06) 100%)',
                     padding: '0.5rem 1rem',
                     borderRadius: '16px',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
-                    border: '1px solid rgba(0,0,0,0.04)',
+                    boxShadow: '0 2px 12px rgba(78,205,196,0.1)',
+                    border: '1px solid rgba(78,205,196,0.2)',
                     flexShrink: 0,
                 }}>
                     <Calendar size={18} color="var(--primary)" style={{ flexShrink: 0 }} />
@@ -366,18 +356,8 @@ const Activity = () => {
                                     </div>
                                 )}
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: '#888', fontSize: '0.85rem', marginBottom: '1rem' }}>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <Calendar size={14} /> {activity.date}
-                                </span>
-                                <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); toggleLike(activity.id); }}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', padding: '0.25rem', background: 'transparent', color: likes[activity.id] ? 'var(--primary)' : '#aaa' }}
-                                    title="Like"
-                                >
-                                    <Heart size={18} fill={likes[activity.id] ? 'currentColor' : 'none'} /> {likes[activity.id] ? 'Liked' : 'Like'}
-                                </button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#888', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                                <Calendar size={14} /> {activity.date}
                             </div>
                             <p style={{ color: '#666', lineHeight: '1.5' }}>{activity.description}</p>
                         </div>

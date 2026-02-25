@@ -49,6 +49,14 @@ button:hover {
   padding: 0 1rem;
 }
 
+/* Ensure navbar is always visible and on top */
+.navbar-main {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+  background: #ffffff !important;
+}
+
 a {
   text-decoration: none;
   color: inherit;

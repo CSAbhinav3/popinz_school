@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Edit, Trash2, Plus, X, Save, Gift, UserPlus } from 'lucide-react';
+import { Search, Edit, Trash2, Plus, X, Save, Gift } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 
@@ -43,10 +43,6 @@ const Students = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [createParentLogin, setCreateParentLogin] = useState(false);
-    const [parentName, setParentName] = useState("");
-    const [parentPassword, setParentPassword] = useState("");
-    const [createParentError, setCreateParentError] = useState("");
 
     // Form State
     const [currentStudent, setCurrentStudent] = useState({
@@ -65,20 +61,12 @@ const Students = () => {
     // Handlers
     const handleAddNew = () => {
         setCurrentStudent({ id: null, name: '', section: 'Preschool', birthday: '', parentEmail: '' });
-        setCreateParentLogin(false);
-        setParentName("");
-        setParentPassword("");
-        setCreateParentError("");
         setIsEditing(false);
         setIsModalOpen(true);
     };
 
     const handleEdit = (student) => {
         setCurrentStudent(student);
-        setCreateParentLogin(false);
-        setParentName("");
-        setParentPassword("");
-        setCreateParentError("");
         setIsEditing(true);
         setIsModalOpen(true);
     };
@@ -95,41 +83,6 @@ const Students = () => {
         if (!currentStudent.name || !currentStudent.section) {
             alert("Please fill in the required fields");
             return;
-        }
-
-        setCreateParentError("");
-
-        if (!isEditing && createParentLogin && (currentStudent.parentEmail || parentName || parentPassword)) {
-            const email = (currentStudent.parentEmail || "").trim();
-            const name = (parentName || "").trim();
-            const password = parentPassword;
-            if (!email || !name || !password) {
-                setCreateParentError("To create a parent login, please fill Parent email, Parent name, and Parent password.");
-                return;
-            }
-            const token = localStorage.getItem("access_token");
-            if (!token) {
-                setCreateParentError("You must be logged in to create a parent account.");
-                return;
-            }
-            try {
-                const res = await fetch(`${API_URL}/users/create-parent`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ name, email, password }),
-                });
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok) {
-                    setCreateParentError(data.detail || "Failed to create parent account.");
-                    return;
-                }
-            } catch (err) {
-                setCreateParentError(err.message || "Could not reach server.");
-                return;
-            }
         }
 
         if (isEditing) {
@@ -345,63 +298,8 @@ const Students = () => {
                                         <option value="UKG">UKG</option>
                                     </select>
                                 </div>
-                                {(user?.role === 'teacher' || user?.role === 'admin') && !isEditing && (
-                                    <>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                                            <input
-                                                type="checkbox"
-                                                id="create-parent-login"
-                                                checked={createParentLogin}
-                                                onChange={e => setCreateParentLogin(e.target.checked)}
-                                            />
-                                            <label htmlFor="create-parent-login" style={{ fontWeight: 600, color: '#444', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                                                <UserPlus size={18} /> Create parent login (create account for this email)
-                                            </label>
-                                        </div>
-                                        {createParentLogin && (
-                                            <>
-                                                <div>
-                                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#444' }}>Parent email</label>
-                                                    <input
-                                                        type="email"
-                                                        value={currentStudent.parentEmail || ''}
-                                                        onChange={e => setCurrentStudent({ ...currentStudent, parentEmail: e.target.value.trim() })}
-                                                        style={{ width: '100%', padding: '0.8rem', borderRadius: '10px', border: '1px solid #ddd', fontSize: '1rem' }}
-                                                        placeholder="parent@example.com"
-                                                    />
-                                                    <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.35rem' }}>The email this parent uses to log in. They will only see this child in Attendance.</p>
-                                                </div>
-                                                <div>
-                                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#444' }}>Parent name *</label>
-                                                    <input
-                                                        type="text"
-                                                        value={parentName}
-                                                        onChange={e => setParentName(e.target.value)}
-                                                        style={{ width: '100%', padding: '0.8rem', borderRadius: '10px', border: '1px solid #ddd', fontSize: '1rem' }}
-                                                        placeholder="e.g. Jane Smith"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#444' }}>Parent password *</label>
-                                                    <input
-                                                        type="password"
-                                                        value={parentPassword}
-                                                        onChange={e => setParentPassword(e.target.value)}
-                                                        style={{ width: '100%', padding: '0.8rem', borderRadius: '10px', border: '1px solid #ddd', fontSize: '1rem' }}
-                                                        placeholder="Min 6 characters"
-                                                    />
-                                                    <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.35rem' }}>Parent will use this with the email above to log in.</p>
-                                                </div>
-                                            </>
-                                        )}
-                                        {createParentError && (
-                                            <p style={{ fontSize: '0.9rem', color: '#b91c1c', margin: 0 }}>{createParentError}</p>
-                                        )}
-                                    </>
-                                )}
-                                {isEditing && (
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#444' }}>Parent email</label>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#444' }}>Parent email (optional)</label>
                                     <input
                                         type="email"
                                         value={currentStudent.parentEmail || ''}
@@ -409,9 +307,8 @@ const Students = () => {
                                         style={{ width: '100%', padding: '0.8rem', borderRadius: '10px', border: '1px solid #ddd', fontSize: '1rem' }}
                                         placeholder="parent@example.com"
                                     />
-                                    <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.35rem' }}>The email this parent uses to log in. They will only see this child in Attendance.</p>
+                                    <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.35rem' }}>Link this student to a parent. Parent account must be created by admin first.</p>
                                 </div>
-                                )}
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#444' }}>Birthday (optional)</label>
                                     <input

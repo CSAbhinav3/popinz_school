@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Send, Star, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 
 const FEEDBACK_CATEGORIES = [
     { value: 'compliment', label: 'Compliment' },
@@ -9,11 +10,13 @@ const FEEDBACK_CATEGORIES = [
 ];
 
 const Feedback = () => {
+    const { user } = useAuth();
     const [submitted, setSubmitted] = useState(false);
     const [rating, setRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
     const [category, setCategory] = useState('compliment');
     const [anonymous, setAnonymous] = useState(false);
+    const parentNameDefault = user?.role === 'parent' ? (user?.full_name || user?.name || '') : '';
 
     const recentFeedbacks = (() => {
         try {
@@ -158,9 +161,15 @@ const Feedback = () => {
 
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.9rem' }}>Parent Name *</label>
+                            {parentNameDefault && (
+                                <p style={{ fontSize: '0.85rem', color: 'var(--primary)', marginBottom: '0.35rem' }}>
+                                    Submitting as parent
+                                </p>
+                            )}
                             <input
                                 name="parentName"
                                 type="text"
+                                defaultValue={parentNameDefault}
                                 disabled={anonymous}
                                 required={!anonymous}
                                 placeholder={anonymous ? 'Submitted anonymously' : 'Your name'}
