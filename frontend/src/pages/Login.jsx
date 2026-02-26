@@ -41,7 +41,8 @@ const Login = () => {
       if (isNetworkError) {
         setErrorMessage("Can't reach the server. Is the backend running? Start it with: cd backend then py -m uvicorn app.main:app --reload --port 8000");
       } else {
-        setErrorMessage(err.message || "Invalid email or password.");
+        const msg = err?.message;
+        setErrorMessage(typeof msg === "string" ? msg : "Invalid email or password.");
       }
     } finally {
       setLoading(false);

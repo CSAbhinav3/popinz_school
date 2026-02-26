@@ -49,7 +49,14 @@ export const AuthProvider = ({ children }) => {
         const data = await res.json().catch(() => ({}));
 
         if (!res.ok) {
-            const msg = data.detail || (Array.isArray(data.detail) ? data.detail.map(d => d.msg).join(', ') : 'Invalid credentials');
+            let msg = 'Invalid credentials';
+            if (Array.isArray(data.detail)) {
+                msg = data.detail.map((d) => d.msg || d.message || JSON.stringify(d)).join(', ');
+            } else if (typeof data.detail === 'string') {
+                msg = data.detail;
+            } else if (data.detail?.msg) {
+                msg = data.detail.msg;
+            }
             throw new Error(msg);
         }
 
