@@ -7,7 +7,7 @@ export const useAuth = () => useContext(AuthContext);
 // ✅ Use deployed backend URL
 const API_URL =
   import.meta.env.VITE_API_URL ||
-  'https://preschool-backend-production.up.railway.app/api/v1';
+  'https://popinz-school-1iy3.onrender.com/api/v1';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
