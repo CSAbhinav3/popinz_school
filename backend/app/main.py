@@ -33,11 +33,9 @@ def create_application() -> FastAPI:
         redoc_url="/redoc",
     )
     app.add_middleware(RequestTimingMiddleware)
-    # Allow any localhost/127.0.0.1 origin (any port) — added last so it runs first on response
-    app.add_middleware(LocalhostCORSMiddleware)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origins,
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
